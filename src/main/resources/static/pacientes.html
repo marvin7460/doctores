@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Pacientes</title>
+    <!-- Enlace al CSS de Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Estilos personalizados */
+        .navbar-custom {
+            background-color: #000000; /* Negro */
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-text {
+            color: #ffffff; /* Blanco */
+        }
+        .navbar-custom .navbar-nav .nav-link {
+            color: #ff0000; /* Rojo */
+        }
+        .navbar-custom .nav-item.active .nav-link {
+            color: #ffffff; /* Blanco */
+            background-color: #ff0000; /* Rojo */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
+    <a class="navbar-brand" href="#">IMSS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item ">
+                <a class="nav-link" href="index.html">Doctores </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="pacientes.html">Pacientes <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="expediente.html">Contacto</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="buscar%20por%20id.html">Expedientes</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- Contenedor principal -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Formulario para agregar un nuevo paciente -->
+            <form id="nuevoPacienteForm">
+                <h2>Formulario de Pacientes</h2>
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" class="form-control" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="edad">Edad:</label>
+                    <input type="number" class="form-control" id="edad" required>
+                </div>
+                <div class="form-group">
+                    <label for="genero">Género:</label>
+                    <select class="form-control" id="genero" required>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" class="form-control" id="direccion" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" class="form-control" id="telefono" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Agregar Paciente</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="container mt-4">
+        <h2>Lista de Pacientes</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Género</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="pacientesTableBody">
+            <!-- Aquí se cargarán los datos de los pacientes -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Scripts de Bootstrap (jQuery y Popper.js) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<!-- Script de Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Función para agregar un nuevo paciente
+    function agregarPaciente(event) {
+        event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+
+        // Obtener los valores del formulario
+        const nombre = document.getElementById('nombre').value.trim();
+        const edad = parseInt(document.getElementById('edad').value);
+        const genero = document.getElementById('genero').value;
+        const direccion = document.getElementById('direccion').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+
+        // Realizar las validaciones necesarias
+        if (nombre === '' || isNaN(edad) || genero === '' || direccion === '' || telefono === '') {
+            alert('Por favor completa todos los campos correctamente.');
+            return;
+        }
+
+        // Enviar los datos del nuevo paciente al servidor
+        fetch('/pacientes', {
+            method: 'POST',
+            body: JSON.stringify({ nombre, edad, genero, direccion, telefono }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Nuevo paciente agregado con éxito.');
+                    // Limpiar el formulario
+                    document.getElementById('nuevoPacienteForm').reset();
+                    // Actualizar la lista de pacientes
+                    obtenerPacientes();
+                } else {
+                    console.error('Error al agregar el nuevo paciente:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al agregar el nuevo paciente:', error));
+    }
+
+    // Función para obtener la lista de pacientes
+    function obtenerPacientes() {
+        fetch('/pacientes')
+            .then(response => response.json())
+            .then(data => {
+                const pacientesTableBody = document.getElementById('pacientesTableBody');
+                pacientesTableBody.innerHTML = ''; // Limpiar tabla antes de agregar datos nuevos
+                data.forEach(paciente => {
+                    const row = `
+                        <tr id="row-${paciente.id}">
+                            <td contenteditable="true">${paciente.nombre}</td>
+                            <td contenteditable="true">${paciente.edad}</td>
+                            <td contenteditable="true">${paciente.genero}</td>
+                            <td contenteditable="true">${paciente.direccion}</td>
+                            <td contenteditable="true">${paciente.telefono}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editarPaciente(${paciente.id})">Editar</button>
+                                <button class="btn btn-danger" onclick="borrarPaciente(${paciente.id})">Borrar</button>
+                                <button class="btn btn-success" onclick="guardarPaciente(${paciente.id})">Guardar</button>
+                            </td>
+                        </tr>
+                    `;
+                    pacientesTableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error al obtener la lista de pacientes:', error));
+    }
+
+    // Función para borrar un paciente
+    function borrarPaciente(pacienteId) {
+        fetch(`/pacientes/${pacienteId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Paciente borrado con éxito:', pacienteId);
+                    // Actualizar la lista de pacientes después de borrar uno
+                    obtenerPacientes();
+                } else {
+                    console.error('Error al borrar el paciente:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al borrar el paciente:', error));
+    }
+
+    // Función para editar un paciente
+    function editarPaciente(pacienteId) {
+        // Habilitar la edición de la fila
+        const row = document.getElementById(`row-${pacienteId}`).querySelectorAll('td[contenteditable="true"]');
+        row.forEach(cell => {
+            cell.contentEditable = 'true';
+        });
+    }
+
+    // Función para guardar los cambios editados del paciente
+    function guardarPaciente(pacienteId) {
+        const row = document.getElementById(`row-${pacienteId}`);
+        const nombre = row.cells[0].innerText;
+        const edad = parseInt(row.cells[1].innerText);
+        const genero = row.cells[2].innerText;
+        const direccion = row.cells[3].innerText;
+        const telefono = row.cells[4].innerText;
+
+        fetch(`/pacientes/${pacienteId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ nombre, edad, genero, direccion, telefono }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Paciente actualizado:', pacienteId);
+                    // Deshabilitar la edición después de guardar
+                    const editableCells = row.querySelectorAll('td[contenteditable="true"]');
+                    editableCells.forEach(cell => {
+                        cell.contentEditable = 'false';
+                    });
+                    // Actualizar la lista de pacientes
+                    obtenerPacientes();
+                } else {
+                    console.error('Error al actualizar el paciente:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al actualizar el paciente:', error));
+    }
+
+    // Escuchar el evento submit del formulario y llamar a la función agregarPaciente
+    document.getElementById('nuevoPacienteForm').addEventListener('submit', agregarPaciente);
+
+    // Cargar la lista de pacientes al cargar la página
+    window.onload = obtenerPacientes;
+</script>
+</body>
+</html>

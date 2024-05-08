@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda por ID</title>
+    <!-- Enlace al CSS de Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Estilos personalizados */
+        .navbar-custom {
+            background-color: #000000; /* Negro */
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-text {
+            color: #ffffff; /* Blanco */
+        }
+        .navbar-custom .navbar-nav .nav-link {
+            color: #ff0000; /* Rojo */
+        }
+        .navbar-custom .nav-item.active .nav-link {
+            color: #ffffff; /* Blanco */
+            background-color: #ff0000; /* Rojo */
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
+    <a class="navbar-brand" href="#">IMSS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item ">
+                <a class="nav-link" href="index.html">Doctores </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="pacientes.html">Pacientes </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link" href="expediente.html">Expedientes</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="buscar%20por%20id.html">Expedientes</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="mt-4">Búsqueda por ID</h1>
+
+    <!-- Sección de búsqueda de pacientes -->
+    <div class="card my-4">
+        <div class="card-header">Búsqueda de Pacientes</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="pacienteId">ID del Paciente:</label>
+                <input type="text" class="form-control" id="pacienteId">
+            </div>
+            <button class="btn btn-primary" onclick="buscarPaciente()">Buscar Paciente</button>
+            <div id="pacienteResult" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Sección de búsqueda de doctores -->
+    <div class="card my-4">
+        <div class="card-header">Búsqueda de Doctores</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="doctorId">ID del Doctor:</label>
+                <input type="text" class="form-control" id="doctorId">
+            </div>
+            <button class="btn btn-primary" onclick="buscarDoctor()">Buscar Doctor</button>
+            <div id="doctorResult" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Sección de búsqueda de expedientes -->
+    <div class="card my-4">
+        <div class="card-header">Búsqueda de Expedientes</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="expedienteId">ID del Expediente:</label>
+                <input type="text" class="form-control" id="expedienteId">
+            </div>
+            <button class="btn btn-primary" onclick="buscarExpediente()">Buscar Expediente</button>
+            <div id="expedienteResult" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts de Bootstrap (jQuery y Popper.js) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<!-- Script de Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Función para buscar un paciente por su ID
+    function buscarPaciente() {
+        const pacienteId = document.getElementById('pacienteId').value;
+        fetch(`/pacientes/${pacienteId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('pacienteResult').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error al buscar paciente:', error);
+                document.getElementById('pacienteResult').innerText = 'Error al buscar paciente.';
+            });
+    }
+
+    // Función para buscar un doctor por su ID
+    function buscarDoctor() {
+        const doctorId = document.getElementById('doctorId').value;
+        fetch(`/doctores/${doctorId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('doctorResult').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error al buscar doctor:', error);
+                document.getElementById('doctorResult').innerText = 'Error al buscar doctor.';
+            });
+    }
+
+    // Función para buscar un expediente por su ID
+    function buscarExpediente() {
+        const expedienteId = document.getElementById('expedienteId').value;
+        fetch(`/expedientes/${expedienteId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('expedienteResult').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error al buscar expediente:', error);
+                document.getElementById('expedienteResult').innerText = 'Error al buscar expediente.';
+            });
+    }
+</script>
+</body>
+</html>

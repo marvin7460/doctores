@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedientes Médicos</title>
+    <!-- Enlace al CSS de Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos personalizados */
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+    <style>
+        /* Estilos personalizados */
+        .navbar-custom {
+            background-color: #000000; /* Negro */
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-text {
+            color: #ffffff; /* Blanco */
+        }
+        .navbar-custom .navbar-nav .nav-link {
+            color: #ff0000; /* Rojo */
+        }
+        .navbar-custom .nav-item.active .nav-link {
+            color: #ffffff; /* Blanco */
+            background-color: #ff0000; /* Rojo */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-custom">
+    <a class="navbar-brand" href="#">IMSS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item ">
+                <a class="nav-link" href="index.html">Doctores </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="pacientes.html">Pacientes </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="expediente.html">Expedientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="buscar%20por%20id.html">Expedientes</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- Contenedor principal -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Formulario para agregar un nuevo expediente -->
+            <form id="nuevoExpedienteForm">
+                <h2>Crear Expediente Médico</h2>
+                <div class="form-group">
+                    <label for="paciente">Paciente:</label>
+                    <select class="form-control" id="paciente" required>
+                        <!-- Aquí se cargarán los nombres de los pacientes -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sintomas">Síntomas:</label>
+                    <textarea class="form-control" id="sintomas" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="diagnostico">Diagnóstico:</label>
+                    <textarea class="form-control" id="diagnostico" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tratamiento">Tratamiento:</label>
+                    <textarea class="form-control" id="tratamiento" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fechaConsulta">Fecha de Consulta:</label>
+                    <input type="date" class="form-control" id="fechaConsulta" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Agregar Expediente</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+
+            <h2>Lista de Expedientes</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Síntomas</th>
+                    <th>Diagnóstico</th>
+                    <th>Tratamiento</th>
+                    <th>Fecha de Consulta</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="expedientesTableBody">
+                <!-- Aquí se cargarán los datos de los expedientes -->
+                </tbody>
+            </table>
+
+    </div>
+</div>
+
+<!-- Scripts de Bootstrap (jQuery y Popper.js) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<!-- Script de Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Función para cargar los nombres de los pacientes en el formulario
+    function cargarNombresPacientes() {
+        fetch('/pacientes')
+            .then(response => response.json())
+            .then(data => {
+                const pacienteSelect = document.getElementById('paciente');
+                pacienteSelect.innerHTML = ''; // Limpiar select antes de agregar nombres nuevos
+                data.forEach(paciente => {
+                    const option = document.createElement('option');
+                    option.value = paciente.id;
+                    option.textContent = paciente.nombre;
+                    pacienteSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error al obtener la lista de pacientes:', error));
+    }
+
+    // Función para agregar un nuevo expediente
+    function agregarExpediente(event) {
+        event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+
+        // Obtener los valores del formulario
+        const pacienteId = document.getElementById('paciente').value;
+        const sintomas = document.getElementById('sintomas').value.trim();
+        const diagnostico = document.getElementById('diagnostico').value.trim();
+        const tratamiento = document.getElementById('tratamiento').value.trim();
+        const fechaConsulta = document.getElementById('fechaConsulta').value;
+
+        // Enviar los datos del nuevo expediente al servidor
+        fetch('/expedientes', {
+            method: 'POST',
+            body: JSON.stringify({ pacienteId, sintomas, diagnostico, tratamiento, fechaConsulta }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Nuevo expediente médico agregado con éxito.');
+                    // Limpiar el formulario
+                    document.getElementById('nuevoExpedienteForm').reset();
+                    // Actualizar la lista de expedientes médicos
+                    obtenerExpedientes();
+                } else {
+                    console.error('Error al agregar el nuevo expediente médico:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al agregar el nuevo expediente médico:', error));
+    }
+
+    // Función para obtener la lista de expedientes médicos
+    function obtenerExpedientes() {
+        fetch('/expedientes')
+            .then(response => response.json())
+            .then(data => {
+                const expedientesTableBody = document.getElementById('expedientesTableBody');
+                expedientesTableBody.innerHTML = ''; // Limpiar tabla antes de agregar datos nuevos
+                data.forEach(expediente => {
+                    const row = `
+                        <tr id=${expediente.id}>
+                            <td >${expediente.pacienteNombre}</td>
+                            <td >${expediente.sintomas}</td>
+                            <td >${expediente.diagnostico}</td>
+                            <td >${expediente.tratamiento}</td>
+                            <td >${expediente.fechaConsulta}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editarExpediente(${expediente.id})">Editar</button>
+                                <button class="btn btn-danger" onclick="borrarExpediente(${expediente.id})">Borrar</button>
+                            </td>
+                        </tr>
+                    `;
+                    expedientesTableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error al obtener la lista de expedientes médicos:', error));
+    }
+
+    // Función para borrar un expediente médico
+    function borrarExpediente(expedienteId) {
+        fetch(`/expedientes/${expedienteId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Expediente médico borrado con éxito:', expedienteId);
+                    // Actualizar la lista de expedientes médicos después de borrar uno
+                    obtenerExpedientes();
+                } else {
+                    console.error('Error al borrar el expediente médico:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al borrar el expediente médico:', error));
+    }
+
+    // Función para editar un expediente médico
+    function editarExpediente(expedienteId) {
+        // Aquí puedes implementar la lógica para editar un expediente
+        const row = document.getElementById(expedienteId);
+
+        // Habilitar la edición en las celdas necesarias
+        const editableCells = row.querySelectorAll('td:not(:last-child)');
+        editableCells.forEach(cell => {
+            cell.contentEditable = 'true';
+        });
+
+        // Cambiar el texto del botón a "Guardar"
+        const button = row.querySelector('button.btn-primary');
+        button.textContent = 'Guardar';
+        button.onclick = function() {
+            guardarExpediente(expedienteId);
+        };
+    }
+    function guardarExpediente(expedienteId) {
+        const row = document.getElementById(expedienteId);
+        const pacienteNombre = row.cells[0].innerText;
+        const sintomas = row.cells[1].innerText;
+        const diagnostico = row.cells[2].innerText;
+        const tratamiento = row.cells[3].innerText;
+        const fechaConsulta = row.cells[4].innerText;
+        console.log( pacienteNombre, sintomas, diagnostico, tratamiento, fechaConsulta )
+
+        fetch(`/expedientes/${expedienteId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ pacienteNombre, sintomas, diagnostico, tratamiento, fechaConsulta }),
+
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Expediente actualizado:', expedienteId);
+                    // Deshabilitar la edición después de guardar
+                    const editableCells = row.querySelectorAll('td[contenteditable="true"]');
+                    editableCells.forEach(cell => {
+                        cell.contentEditable = 'false';
+                    });
+                    // Restaurar el botón a "Editar"
+                    const button = row.querySelector('button.btn-primary');
+                    button.textContent = 'Editar';
+                    button.onclick = function() {
+                        editarExpediente(expedienteId);
+                    };
+                    // Actualizar la lista de expedientes
+                    obtenerExpedientes();
+                } else {
+                    console.error('Error al actualizar el expediente:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al actualizar el expediente:', error));
+    }function guardarExpediente(expedienteId) {
+        const row = document.getElementById(expedienteId);
+        const pacienteNombre = row.cells[0].innerText;
+        const sintomas = row.cells[1].innerText;
+        const diagnostico = row.cells[2].innerText;
+        const tratamiento = row.cells[3].innerText;
+        const fechaConsulta = row.cells[4].innerText;
+
+        fetch(`/expedientes/${expedienteId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ pacienteNombre, sintomas, diagnostico, tratamiento, fechaConsulta }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Expediente actualizado:', expedienteId);
+                    // Deshabilitar la edición después de guardar
+                    const editableCells = row.querySelectorAll('td[contenteditable="true"]');
+                    editableCells.forEach(cell => {
+                        cell.contentEditable = 'false';
+                    });
+                    // Restaurar el botón a "Editar"
+                    const button = row.querySelector('button.btn-primary');
+                    button.textContent = 'Editar';
+                    button.onclick = function() {
+                        editarExpediente(expedienteId);
+                    };
+                    // Actualizar la lista de expedientes
+                    obtenerExpedientes();
+                } else {
+                    console.error('Error al actualizar el expediente:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error al actualizar el expediente:', error));
+    }
+
+    // Escuchar el evento submit del formulario y llamar a la función agregarExpediente
+    document.getElementById('nuevoExpedienteForm').addEventListener('submit', agregarExpediente);
+
+    // Cargar la lista de expedientes médicos al cargar la página
+    window.onload = function() {
+        cargarNombresPacientes();
+        obtenerExpedientes();
+        guardarExpediente();
+    };
+</script>
+</body>
+</html>
